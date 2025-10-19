@@ -44,11 +44,11 @@ substituicoes = {
 BASE_DIR = Path(__file__).resolve().parent
 
 # === Caminhos dos modelos de entrada ===
-modelo_informacoes = BASE_DIR / "modelos" / "entrada" / "modelo-folha-info.docx"
-modelo_portaria = BASE_DIR / "modelos" / "entrada" / "modelo-folha-portaria.docx"
+modelo_informacoes = BASE_DIR / "amostra" / "entrada" / "modelo-folha-info.docx"
+modelo_portaria = BASE_DIR / "amostra" / "entrada" / "modelo-folha-portaria.docx"
 
 # === Diretório de saída ===
-saida_dir = BASE_DIR / "modelos" / "saida"
+saida_dir = BASE_DIR / "amostra" / "saida"
 saida_dir.mkdir(parents=True, exist_ok=True)  # cria a pasta caso não exista
 
 # === Caminhos dos arquivos de saída ===
