@@ -12,7 +12,7 @@ def data_hoje_formatada():
     hoje = datetime.now()
     return f"{hoje.day} de {meses[hoje.month]} de {hoje.year}"
 
-# === 2. Coleta de dados pelo terminal ===
+
 fis = input("Digite o número da folha de deferimento (FIS): ")
 nome = input("Digite o nome do requerente (NOME): ")
 matricula = input("Digite a matrícula (MATRICULA): ")
