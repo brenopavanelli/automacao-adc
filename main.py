@@ -23,7 +23,6 @@ numero_processo = input("Digite o número do processo (NUMERO_PROCESSO): ")
 data_deferimento = input("Digite a data de deferimento (DATA_DEFERIMENTO): ")
 competencia = input("Digite a competência (COMPETENCIA): ")
 
-# Gera automaticamente a data de hoje
 hoje = data_hoje_formatada()
 
 # === 3. Mapeamento dos placeholders e valores ===
@@ -44,16 +43,16 @@ substituicoes = {
 BASE_DIR = Path(__file__).resolve().parent
 
 # === Caminhos dos modelos de entrada ===
-modelo_informacoes = BASE_DIR / "amostra" / "entrada" / "modelo-folha-info.docx"
-modelo_portaria = BASE_DIR / "amostra" / "entrada" / "modelo-folha-portaria.docx"
+modelo_informacoes = BASE_DIR / "modelos" / "entrada" / "modelo-folha-info.docx"
+modelo_portaria = BASE_DIR / "modelos" / "entrada" / "modelo-folha-portaria.docx"
 
 # === Diretório de saída ===
-saida_dir = BASE_DIR / "amostra" / "saida"
+saida_dir = BASE_DIR / "modelos" / "saida"
 saida_dir.mkdir(parents=True, exist_ok=True)  # cria a pasta caso não exista
 
 # === Caminhos dos arquivos de saída ===
 saida_informacoes = saida_dir / f"Adicional por Conclusão de Curso - {nome}.docx"
-saida_portaria = saida_dir / f"Adicional por Conclusão de Curso - {nome} para portaria.docx"
+saida_portaria = saida_dir / f"Adicional Conclusão de Curso - {nome}.docx"
 
 
 # === 5. Função de substituição ===
