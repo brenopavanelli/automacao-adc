@@ -12,7 +12,7 @@ def data_hoje_formatada():
     hoje = datetime.now()
     return f"{hoje.day} de {meses[hoje.month]} de {hoje.year}"
 
-# === 2. Coleta de dados pelo terminal ===
+
 fis = input("Digite o número da folha de deferimento (FIS): ")
 nome = input("Digite o nome do requerente (NOME): ")
 matricula = input("Digite a matrícula (MATRICULA): ")
@@ -23,7 +23,6 @@ numero_processo = input("Digite o número do processo (NUMERO_PROCESSO): ")
 data_deferimento = input("Digite a data de deferimento (DATA_DEFERIMENTO): ")
 competencia = input("Digite a competência (COMPETENCIA): ")
 
-# Gera automaticamente a data de hoje
 hoje = data_hoje_formatada()
 
 # === 3. Mapeamento dos placeholders e valores ===
@@ -53,7 +52,7 @@ saida_dir.mkdir(parents=True, exist_ok=True)  # cria a pasta caso não exista
 
 # === Caminhos dos arquivos de saída ===
 saida_informacoes = saida_dir / f"Adicional por Conclusão de Curso - {nome}.docx"
-saida_portaria = saida_dir / f"Adicional por Conclusão de Curso - {nome} para portaria.docx"
+saida_portaria = saida_dir / f"Adicional Conclusão de Curso - {nome}.docx"
 
 
 # === 5. Função de substituição ===
