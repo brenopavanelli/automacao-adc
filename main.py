@@ -1,6 +1,9 @@
 from docx import Document
 from datetime import datetime
 from pathlib import Path
+import json
+import subprocess
+import os
 
 # === 1. Função para gerar a data de hoje formatada ===
 def data_hoje_formatada():
@@ -38,17 +41,29 @@ substituicoes = {
 # === Define o diretório base (onde está o main.py) ===
 BASE_DIR = Path(__file__).resolve().parent
 
+config_path = BASE_DIR / "config.json"
+
+if not config_path.exists():
+    raise FileNotFoundError("Arquivo config.json não encontrado! Crie um antes de executar.")
+
+with open(config_path, "r", encoding="utf-8") as f:
+        config = json.load(f)
+
 # === Caminhos dos modelos de entrada ===
 modelo_informacoes = BASE_DIR / "modelos" / "entrada" / "modelo-folha-info.docx"
 modelo_portaria = BASE_DIR / "modelos" / "entrada" / "modelo-folha-portaria.docx"
 
-# === Diretório de saída ===
-saida_dir = BASE_DIR / "modelos" / "saida"
-saida_dir.mkdir(parents=True, exist_ok=True)  # cria a pasta caso não exista
+# Paths de saída vindos do arquivo externo
+saida_informacoes_dir = Path(config["saida_informacoes"])
+saida_portaria_dir = Path(config["saida_portaria"])
 
-# === Caminhos dos arquivos de saída ===
-saida_portaria = saida_dir / f"Adicional por Conclusão de Curso - {nome}.docx"
-saida_informacoes= saida_dir / f"Adicional Conclusão de Curso - {nome}.docx"
+# Garante que as pastas existem
+saida_informacoes_dir.mkdir(parents=True, exist_ok=True)
+saida_portaria_dir.mkdir(parents=True, exist_ok=True)
+
+# Gera caminhos finais dos arquivos
+saida_informacoes = saida_informacoes_dir / f"Adicional Conclusão de Curso - {nome}.docx"
+saida_portaria = saida_portaria_dir / f"Adicional por Conclusão de Curso - {nome}.docx"
 
 
 # === 5. Função de substituição ===
@@ -80,6 +95,7 @@ def aplicar_substituicoes(caminho_modelo, caminho_saida, mapa):
 # === 6. Gera ambos os documentos ===
 aplicar_substituicoes(modelo_informacoes, saida_informacoes, substituicoes)
 aplicar_substituicoes(modelo_portaria, saida_portaria, substituicoes)
+
 
 # === 7. Exibe confirmação ===
 print("\n✅ Documentos gerados com sucesso!")

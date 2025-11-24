@@ -8,6 +8,7 @@ __pycache__/
 
 # Pastas com dados sensíveis
 modelos/
+config.json
 
 # Distribution / packaging
 .Python
