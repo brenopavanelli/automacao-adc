@@ -17,8 +17,6 @@ fis = input("Digite o número da folha de deferimento (FIS): ")
 nome = input("Digite o nome do requerente (NOME): ")
 matricula = input("Digite a matrícula (MATRICULA): ")
 cargo = input("Digite o cargo (CARGO): ")
-inciso = input("Digite o inciso (INCISO): ")
-grupo = input("Digite o grupo (GRUPO): ")
 numero_processo = input("Digite o número do processo (NUMERO_PROCESSO): ")
 data_deferimento = input("Digite a data de deferimento (DATA_DEFERIMENTO): ")
 competencia = input("Digite a competência (COMPETENCIA): ")
@@ -31,8 +29,6 @@ substituicoes = {
     "{{NOME}}": nome,
     "{{MATRICULA}}": matricula,
     "{{CARGO}}": cargo,
-    "{{INCISO}}": inciso,
-    "{{GRUPO}}": grupo,
     "{{NUMERO_PROCESSO}}": numero_processo,
     "{{DATA_DEFERIMENTO}}": data_deferimento,
     "{{COMP}}": competencia,
@@ -51,8 +47,8 @@ saida_dir = BASE_DIR / "modelos" / "saida"
 saida_dir.mkdir(parents=True, exist_ok=True)  # cria a pasta caso não exista
 
 # === Caminhos dos arquivos de saída ===
-saida_informacoes = saida_dir / f"Adicional por Conclusão de Curso - {nome}.docx"
-saida_portaria = saida_dir / f"Adicional Conclusão de Curso - {nome}.docx"
+saida_portaria = saida_dir / f"Adicional por Conclusão de Curso - {nome}.docx"
+saida_informacoes= saida_dir / f"Adicional Conclusão de Curso - {nome}.docx"
 
 
 # === 5. Função de substituição ===
