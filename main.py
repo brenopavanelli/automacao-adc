@@ -96,6 +96,33 @@ def aplicar_substituicoes(caminho_modelo, caminho_saida, mapa):
 aplicar_substituicoes(modelo_informacoes, saida_informacoes, substituicoes)
 aplicar_substituicoes(modelo_portaria, saida_portaria, substituicoes)
 
+def abrir_no_libreoffice(caminho_arquivo):
+    """
+    Abre um arquivo usando o LibreOffice em uma nova janela.
+    Compatível com Windows.
+    """
+    # Caminho padrão do LibreOffice no Windows
+    possiveis_caminhos = [
+        r"C:\Program Files\LibreOffice\program\soffice.exe",
+        r"C:\Program Files (x86)\LibreOffice\program\soffice.exe"
+    ]
+
+    # Encontra o executável instalado
+    soffice = None
+    for caminho in possiveis_caminhos:
+        if os.path.exists(caminho):
+            soffice = caminho
+            break
+
+    if soffice is None:
+        raise FileNotFoundError("❌ LibreOffice não encontrado no sistema.")
+
+    # Abre em uma janela separada
+    subprocess.Popen([soffice, caminho_arquivo])
+
+# === Abrir automaticamente no LibreOffice ===
+abrir_no_libreoffice(str(saida_informacoes))
+abrir_no_libreoffice(str(saida_portaria))
 
 # === 7. Exibe confirmação ===
 print("\n✅ Documentos gerados com sucesso!")
