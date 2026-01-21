@@ -16,13 +16,17 @@ def data_hoje_formatada():
     return f"{hoje.day} de {meses[hoje.month]} de {hoje.year}"
 
 
-fis = input("Digite o número da folha de deferimento (FIS): ")
-nome = input("Digite o nome do requerente (NOME): ")
-matricula = input("Digite a matrícula (MATRICULA): ")
-cargo = input("Digite o cargo (CARGO): ")
-numero_processo = input("Digite o número do processo (NUMERO_PROCESSO): ")
-data_deferimento = input("Digite a data de deferimento (DATA_DEFERIMENTO): ")
-competencia = input("Digite a competência (COMPETENCIA): ")
+fis = input("Digite o número da folha de deferimento: ")
+matricula = input("Digite a matrícula: ")
+nome = input("Digite o nome do requerente: ")
+cargo = input("Digite o cargo: ")
+numero_processo = input("Digite o número do processo: ")
+data_deferimento = input("Digite a data de deferimento: ")
+competencia = input("Digite a competência: ")
+inciso = input("Digite o inciso: ")
+
+
+
 
 hoje = data_hoje_formatada()
 
