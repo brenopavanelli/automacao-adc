@@ -15,6 +15,11 @@ def data_hoje_formatada():
     hoje = datetime.now()
     return f"{hoje.day} de {meses[hoje.month]} de {hoje.year}"
 
+hoje = data_hoje_formatada()
+
+# === Define o diretório base (onde está o main.py) ===
+BASE_DIR = Path(__file__).resolve().parent
+config_path = BASE_DIR / "config.json"
 
 fis = input("Digite o número da folha de deferimento: ")
 matricula = input("Digite a matrícula: ")
@@ -25,12 +30,6 @@ data_deferimento = input("Digite a data de deferimento: ")
 competencia = input("Digite a competência: ")
 inciso = input("Digite o inciso: ")
 
-
-
-
-hoje = data_hoje_formatada()
-
-# === 3. Mapeamento dos placeholders e valores ===
 substituicoes = {
     "{{FIS}}": fis,
     "{{NOME}}": nome,
@@ -42,10 +41,12 @@ substituicoes = {
     "{{HOJE}}": hoje
 }
 
-# === Define o diretório base (onde está o main.py) ===
-BASE_DIR = Path(__file__).resolve().parent
+if inciso == "I" or inciso == "II":
+    modelo_portaria = BASE_DIR / "modelos" / "entrada" / "modelo-folha-portaria-com-grupo.docx"
+else:
+    modelo_portaria = BASE_DIR / "modelos" / "entrada" / "modelo-folha-portaria.docx"
 
-config_path = BASE_DIR / "config.json"
+
 
 if not config_path.exists():
     raise FileNotFoundError("Arquivo config.json não encontrado! Crie um antes de executar.")
@@ -55,7 +56,7 @@ with open(config_path, "r", encoding="utf-8") as f:
 
 # === Caminhos dos modelos de entrada ===
 modelo_informacoes = BASE_DIR / "modelos" / "entrada" / "modelo-folha-info.docx"
-modelo_portaria = BASE_DIR / "modelos" / "entrada" / "modelo-folha-portaria.docx"
+
 
 # Paths de saída vindos do arquivo externo
 saida_informacoes_dir = Path(config["saida_informacoes"])
