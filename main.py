@@ -30,6 +30,7 @@ data_deferimento = input("Digite a data de deferimento: ")
 competencia = input("Digite a competência: ")
 inciso = input("Digite o inciso: ")
 
+
 substituicoes = {
     "{{FIS}}": fis,
     "{{NOME}}": nome,
@@ -38,14 +39,16 @@ substituicoes = {
     "{{NUMERO_PROCESSO}}": numero_processo,
     "{{DATA_DEFERIMENTO}}": data_deferimento,
     "{{COMP}}": competencia,
-    "{{HOJE}}": hoje
+    "{{HOJE}}": hoje,
+    "{{INCISO}}": inciso
 }
 
 if inciso == "I" or inciso == "II":
-    modelo_portaria = BASE_DIR / "modelos" / "entrada" / "modelo-folha-portaria-com-grupo.docx"
-else:
     modelo_portaria = BASE_DIR / "modelos" / "entrada" / "modelo-folha-portaria.docx"
-
+else:
+    modelo_portaria = BASE_DIR / "modelos" / "entrada" / "modelo-folha-portaria-com-grupo.docx"
+    grupo = input("Digite o grupo: ")
+    substituicoes["{{GRUPO}}"] = grupo
 
 
 if not config_path.exists():
@@ -73,11 +76,22 @@ saida_portaria = saida_portaria_dir / f"Adicional por Conclusão de Curso - {nom
 
 # === 5. Função de substituição ===
 def substituir_texto(paragrafo, mapa):
+    if not paragrafo.runs:
+        return
+
+    texto_original = "".join(run.text for run in paragrafo.runs)
+    texto_novo = texto_original
+
     for chave, valor in mapa.items():
-        if chave in paragrafo.text:
-            for run in paragrafo.runs:
-                if chave in run.text:
-                    run.text = run.text.replace(chave, valor)
+        texto_novo = texto_novo.replace(chave, str(valor))
+
+    if texto_novo != texto_original:
+        # coloca tudo no primeiro run e apaga o resto
+        paragrafo.runs[0].text = texto_novo
+        for run in paragrafo.runs[1:]:
+            run.text = ""
+
+
 
 def aplicar_substituicoes(caminho_modelo, caminho_saida, mapa):
     """Abre o modelo, substitui e salva o resultado."""
@@ -97,8 +111,8 @@ def aplicar_substituicoes(caminho_modelo, caminho_saida, mapa):
     # Salva o arquivo final
     doc.save(caminho_saida)
 
-# === 6. Gera ambos os documentos ===
-aplicar_substituicoes(modelo_informacoes, saida_informacoes, substituicoes)
+
+# aplicar_substituicoes(modelo_informacoes, saida_informacoes, substituicoes)
 aplicar_substituicoes(modelo_portaria, saida_portaria, substituicoes)
 
 def abrir_no_libreoffice(caminho_arquivo):
@@ -106,13 +120,11 @@ def abrir_no_libreoffice(caminho_arquivo):
     Abre um arquivo usando o LibreOffice em uma nova janela.
     Compatível com Windows.
     """
-    # Caminho padrão do LibreOffice no Windows
     possiveis_caminhos = [
         r"C:\Program Files\LibreOffice\program\soffice.exe",
         r"C:\Program Files (x86)\LibreOffice\program\soffice.exe"
     ]
 
-    # Encontra o executável instalado
     soffice = None
     for caminho in possiveis_caminhos:
         if os.path.exists(caminho):
@@ -122,14 +134,12 @@ def abrir_no_libreoffice(caminho_arquivo):
     if soffice is None:
         raise FileNotFoundError("❌ LibreOffice não encontrado no sistema.")
 
-    # Abre em uma janela separada
     subprocess.Popen([soffice, caminho_arquivo])
 
-# === Abrir automaticamente no LibreOffice ===
-abrir_no_libreoffice(str(saida_informacoes))
+# abrir_no_libreoffice(str(saida_informacoes))
 abrir_no_libreoffice(str(saida_portaria))
 
-# === 7. Exibe confirmação ===
+
 print("\n✅ Documentos gerados com sucesso!")
 print(f"📄 {saida_informacoes}")
 print(f"📄 {saida_portaria}")
