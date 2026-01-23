@@ -112,7 +112,7 @@ def aplicar_substituicoes(caminho_modelo, caminho_saida, mapa):
     doc.save(caminho_saida)
 
 
-# aplicar_substituicoes(modelo_informacoes, saida_informacoes, substituicoes)
+aplicar_substituicoes(modelo_informacoes, saida_informacoes, substituicoes)
 aplicar_substituicoes(modelo_portaria, saida_portaria, substituicoes)
 
 def abrir_no_libreoffice(caminho_arquivo):
@@ -136,7 +136,7 @@ def abrir_no_libreoffice(caminho_arquivo):
 
     subprocess.Popen([soffice, caminho_arquivo])
 
-# abrir_no_libreoffice(str(saida_informacoes))
+abrir_no_libreoffice(str(saida_informacoes))
 abrir_no_libreoffice(str(saida_portaria))
 
 
