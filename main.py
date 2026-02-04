@@ -15,6 +15,27 @@ def data_hoje_formatada():
     hoje = datetime.now()
     return f"{hoje.day} de {meses[hoje.month]} de {hoje.year}"
 
+def gera_competencia(meses_passados=0):
+    hoje = datetime.now()
+    competencia = f"{hoje.month-meses_passados}/{hoje.year}"
+    if len(competencia) == 6:
+        return f"0{competencia}"
+    else:
+        return competencia
+
+def classificar_mes(data_str):
+    try:
+        dt = datetime.strptime(data_str.strip(), "%d/%m/%Y").date()
+    except ValueError:
+        raise ValueError("Data inválida. Use o formato dd/mm/aaaa e uma data real (ex.: 27/01/2026).")
+
+    hoje = datetime.today()
+
+    if (dt.year, dt.month) == (hoje.year, hoje.month):
+        return "mes atual"
+    else:
+        return "mes passado"
+
 hoje = data_hoje_formatada()
 
 # === Define o diretório base (onde está o main.py) ===
@@ -27,9 +48,8 @@ nome = input("Digite o nome do requerente: ")
 cargo = input("Digite o cargo: ")
 numero_processo = input("Digite o número do processo: ")
 data_deferimento = input("Digite a data de deferimento: ")
-competencia = input("Digite a competência: ")
+competencia = gera_competencia()
 inciso = input("Digite o inciso: ")
-
 
 substituicoes = {
     "{{FIS}}": fis,
@@ -50,16 +70,20 @@ else:
     grupo = input("Digite o grupo: ")
     substituicoes["{{GRUPO}}"] = grupo
 
+mes_do_deferimento = classificar_mes(data_deferimento)
+if mes_do_deferimento == 'mes atual':
+    modelo_informacoes = BASE_DIR / "modelos" / "entrada" / "modelo-folha-info.docx"
+else:
+    modelo_informacoes = BASE_DIR / "modelos" / "entrada" / "modelo-folha-info-retroativo.docx"
+    valor_do_retroativo = input("Digite o valor do retroativo a ser pago: ")
+    substituicoes["{{COMPETENCIA_ANTERIOR}} "] = gera_competencia(1)
+    substituicoes["{{VALOR}}"] = valor_do_retroativo
 
 if not config_path.exists():
     raise FileNotFoundError("Arquivo config.json não encontrado! Crie um antes de executar.")
 
 with open(config_path, "r", encoding="utf-8") as f:
         config = json.load(f)
-
-# === Caminhos dos modelos de entrada ===
-modelo_informacoes = BASE_DIR / "modelos" / "entrada" / "modelo-folha-info.docx"
-
 
 # Paths de saída vindos do arquivo externo
 saida_informacoes_dir = Path(config["saida_informacoes"])
