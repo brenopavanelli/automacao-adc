@@ -15,18 +15,42 @@ def data_hoje_formatada():
     hoje = datetime.now()
     return f"{hoje.day} de {meses[hoje.month]} de {hoje.year}"
 
+def gera_competencia(meses_passados=0):
+    hoje = datetime.now()
+    competencia = f"{hoje.month-meses_passados}/{hoje.year}"
+    if len(competencia) == 6:
+        return f"0{competencia}"
+    else:
+        return competencia
 
-fis = input("Digite o número da folha de deferimento (FIS): ")
-nome = input("Digite o nome do requerente (NOME): ")
-matricula = input("Digite a matrícula (MATRICULA): ")
-cargo = input("Digite o cargo (CARGO): ")
-numero_processo = input("Digite o número do processo (NUMERO_PROCESSO): ")
-data_deferimento = input("Digite a data de deferimento (DATA_DEFERIMENTO): ")
-competencia = input("Digite a competência (COMPETENCIA): ")
+def classificar_mes(data_str):
+    try:
+        dt = datetime.strptime(data_str.strip(), "%d/%m/%Y").date()
+    except ValueError:
+        raise ValueError("Data inválida. Use o formato dd/mm/aaaa e uma data real (ex.: 27/01/2026).")
+
+    hoje = datetime.today()
+
+    if (dt.year, dt.month) == (hoje.year, hoje.month):
+        return "mes atual"
+    else:
+        return "mes passado"
 
 hoje = data_hoje_formatada()
 
-# === 3. Mapeamento dos placeholders e valores ===
+# === Define o diretório base (onde está o main.py) ===
+BASE_DIR = Path(__file__).resolve().parent
+config_path = BASE_DIR / "config.json"
+
+fis = input("Digite o número da folha de deferimento: ")
+matricula = input("Digite a matrícula: ")
+nome = input("Digite o nome do requerente: ")
+cargo = input("Digite o cargo: ")
+numero_processo = input("Digite o número do processo: ")
+data_deferimento = input("Digite a data de deferimento: ")
+competencia = gera_competencia()
+inciso = input("Digite o inciso: ")
+
 substituicoes = {
     "{{FIS}}": fis,
     "{{NOME}}": nome,
@@ -35,23 +59,31 @@ substituicoes = {
     "{{NUMERO_PROCESSO}}": numero_processo,
     "{{DATA_DEFERIMENTO}}": data_deferimento,
     "{{COMP}}": competencia,
-    "{{HOJE}}": hoje
+    "{{HOJE}}": hoje,
+    "{{INCISO}}": inciso
 }
 
-# === Define o diretório base (onde está o main.py) ===
-BASE_DIR = Path(__file__).resolve().parent
+if inciso == "I" or inciso == "II":
+    modelo_portaria = BASE_DIR / "modelos" / "entrada" / "modelo-folha-portaria.docx"
+else:
+    modelo_portaria = BASE_DIR / "modelos" / "entrada" / "modelo-folha-portaria-com-grupo.docx"
+    grupo = input("Digite o grupo: ")
+    substituicoes["{{GRUPO}}"] = grupo
 
-config_path = BASE_DIR / "config.json"
+mes_do_deferimento = classificar_mes(data_deferimento)
+if mes_do_deferimento == 'mes atual':
+    modelo_informacoes = BASE_DIR / "modelos" / "entrada" / "modelo-folha-info.docx"
+else:
+    modelo_informacoes = BASE_DIR / "modelos" / "entrada" / "modelo-folha-info-retroativo.docx"
+    valor_do_retroativo = input("Digite o valor do retroativo a ser pago: ")
+    substituicoes["{{COMPETENCIA_ANTERIOR}} "] = gera_competencia(1)
+    substituicoes["{{VALOR}}"] = valor_do_retroativo
 
 if not config_path.exists():
     raise FileNotFoundError("Arquivo config.json não encontrado! Crie um antes de executar.")
 
 with open(config_path, "r", encoding="utf-8") as f:
         config = json.load(f)
-
-# === Caminhos dos modelos de entrada ===
-modelo_informacoes = BASE_DIR / "modelos" / "entrada" / "modelo-folha-info.docx"
-modelo_portaria = BASE_DIR / "modelos" / "entrada" / "modelo-folha-portaria.docx"
 
 # Paths de saída vindos do arquivo externo
 saida_informacoes_dir = Path(config["saida_informacoes"])
@@ -68,11 +100,22 @@ saida_portaria = saida_portaria_dir / f"Adicional por Conclusão de Curso - {nom
 
 # === 5. Função de substituição ===
 def substituir_texto(paragrafo, mapa):
+    if not paragrafo.runs:
+        return
+
+    texto_original = "".join(run.text for run in paragrafo.runs)
+    texto_novo = texto_original
+
     for chave, valor in mapa.items():
-        if chave in paragrafo.text:
-            for run in paragrafo.runs:
-                if chave in run.text:
-                    run.text = run.text.replace(chave, valor)
+        texto_novo = texto_novo.replace(chave, str(valor))
+
+    if texto_novo != texto_original:
+        # coloca tudo no primeiro run e apaga o resto
+        paragrafo.runs[0].text = texto_novo
+        for run in paragrafo.runs[1:]:
+            run.text = ""
+
+
 
 def aplicar_substituicoes(caminho_modelo, caminho_saida, mapa):
     """Abre o modelo, substitui e salva o resultado."""
@@ -92,7 +135,7 @@ def aplicar_substituicoes(caminho_modelo, caminho_saida, mapa):
     # Salva o arquivo final
     doc.save(caminho_saida)
 
-# === 6. Gera ambos os documentos ===
+
 aplicar_substituicoes(modelo_informacoes, saida_informacoes, substituicoes)
 aplicar_substituicoes(modelo_portaria, saida_portaria, substituicoes)
 
@@ -101,13 +144,11 @@ def abrir_no_libreoffice(caminho_arquivo):
     Abre um arquivo usando o LibreOffice em uma nova janela.
     Compatível com Windows.
     """
-    # Caminho padrão do LibreOffice no Windows
     possiveis_caminhos = [
         r"C:\Program Files\LibreOffice\program\soffice.exe",
         r"C:\Program Files (x86)\LibreOffice\program\soffice.exe"
     ]
 
-    # Encontra o executável instalado
     soffice = None
     for caminho in possiveis_caminhos:
         if os.path.exists(caminho):
@@ -117,14 +158,12 @@ def abrir_no_libreoffice(caminho_arquivo):
     if soffice is None:
         raise FileNotFoundError("❌ LibreOffice não encontrado no sistema.")
 
-    # Abre em uma janela separada
     subprocess.Popen([soffice, caminho_arquivo])
 
-# === Abrir automaticamente no LibreOffice ===
 abrir_no_libreoffice(str(saida_informacoes))
 abrir_no_libreoffice(str(saida_portaria))
 
-# === 7. Exibe confirmação ===
+
 print("\n✅ Documentos gerados com sucesso!")
 print(f"📄 {saida_informacoes}")
 print(f"📄 {saida_portaria}")
