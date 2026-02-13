@@ -72,7 +72,7 @@ else:
 
 mes_do_deferimento = classificar_mes(data_deferimento)
 if mes_do_deferimento == 'mes atual':
-    modelo_informacoes = BASE_DIR / "modelos" / "entrada" / "modelo-folha-info.docx"
+    modelo_informacoes = BASE_DIR / "modelos" / "entrada" / "modelo-folha-info2.docx"
 else:
     modelo_informacoes = BASE_DIR / "modelos" / "entrada" / "modelo-folha-info-retroativo.docx"
     valor_do_retroativo = input("Digite o valor do retroativo a ser pago: ")
