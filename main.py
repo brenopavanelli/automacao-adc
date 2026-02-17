@@ -15,16 +15,22 @@ from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 
-# A forma mais fácil (sem precisar baixar o driver manualmente)
 servico = Service(ChromeDriverManager().install())
 driver = webdriver.Chrome(service=servico)
 
-
-def testar_web():
+def acessar_web():
     driver.get("https://pmjaboticabal.smarapd.com.br/rh/#/recursoshumanos/lancamentofixo")
     driver.maximize_window()
     print("Acessando sistema SMARPD")
 
+    # Auxiliares
+    def clicar_em_botao(xpath):
+        botao = WebDriverWait(driver, 10).until(
+            EC.element_to_be_clickable((By.XPATH, xpath))
+        )
+        botao.click()
+
+    # Script
     def realizar_login():
         print("Realizando o login na página")
         try:
@@ -40,10 +46,8 @@ def testar_web():
             senha.send_keys("Cavalo13!")
             print("Senha preenchida")
 
-            confirmar = WebDriverWait(driver, 10).until(
-                EC.element_to_be_clickable((By.XPATH, "/html/body/div[3]/div/div/form/div/div[4]/div/button"))
-            )
-            confirmar.click()
+            confirmar = "/html/body/div[3]/div/div/form/div/div[4]/div/button"
+            clicar_em_botao(confirmar)
 
             print("Login realizado com sucesso.")
         except TimeoutException:
@@ -51,24 +55,27 @@ def testar_web():
 
     def selecionar_unidade_gestora():
         try:
-            confirmar = WebDriverWait(driver, 10).until (
-                EC.element_to_be_clickable((By.XPATH, "/html/body/div[4]/div/form/div[3]/div/button"))
-            )
-            confirmar.click()
+            confirmar = "/html/body/div[4]/div/form/div[3]/div/button"
+            clicar_em_botao(confirmar)
         except TimeoutException:
             print(f"Não foi possível selecionar a unidade gestora (ERRO: {TimeoutException}")
+
+    def incluir_registro():
+        incluir = "/html/body/div[4]/div/div[1]/div/access-control/div/div/a[2]"
+        clicar_em_botao(incluir)
+
+
 
 
     realizar_login()
     selecionar_unidade_gestora()
+    incluir_registro()
 
     time.sleep(10)
     print("Encerrando sistema WEB")
     driver.quit()
 
-testar_web()
 
-'''
 
 # === 1. Função para gerar a data de hoje formatada ===
 def data_hoje_formatada():
@@ -200,9 +207,10 @@ def aplicar_substituicoes(caminho_modelo, caminho_saida, mapa):
     # Salva o arquivo final
     doc.save(caminho_saida)
 
-
+'''
 aplicar_substituicoes(modelo_informacoes, saida_informacoes, substituicoes)
 aplicar_substituicoes(modelo_portaria, saida_portaria, substituicoes)
+'''
 
 def abrir_no_libreoffice(caminho_arquivo):
     """
@@ -225,11 +233,13 @@ def abrir_no_libreoffice(caminho_arquivo):
 
     subprocess.Popen([soffice, caminho_arquivo])
 
+'''
 abrir_no_libreoffice(str(saida_informacoes))
 abrir_no_libreoffice(str(saida_portaria))
+'''
 
+acessar_web()
 
 print("\n✅ Documentos gerados com sucesso!")
 print(f"📄 {saida_informacoes}")
 print(f"📄 {saida_portaria}")
-'''
