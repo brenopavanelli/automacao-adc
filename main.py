@@ -14,6 +14,7 @@ from webdriver_manager.chrome import ChromeDriverManager
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
+from selenium.webdriver.common.keys import Keys
 
 servico = Service(ChromeDriverManager().install())
 driver = webdriver.Chrome(service=servico)
@@ -63,6 +64,18 @@ def acessar_web():
     def incluir_registro():
         incluir = "/html/body/div[4]/div/div[1]/div/access-control/div/div/a[2]"
         clicar_em_botao(incluir)
+
+        def preencher_formulario():
+
+            def preencher_dados():
+                senha = WebDriverWait(driver, 10).until(
+                    EC.presence_of_element_located((By.NAME, "password"))
+                )
+                senha.send_keys("11026")
+            preencher_dados()
+
+        preencher_formulario()
+
 
 
 
