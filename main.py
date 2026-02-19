@@ -5,6 +5,9 @@ import json
 import subprocess
 import os
 
+# Import do módulo web (arquivo separado)
+from web import acessar_web
+
 # === 1. Função para gerar a data de hoje formatada ===
 def data_hoje_formatada():
     meses = {
@@ -15,13 +18,15 @@ def data_hoje_formatada():
     hoje = datetime.now()
     return f"{hoje.day} de {meses[hoje.month]} de {hoje.year}"
 
+
 def gera_competencia(meses_passados=0):
     hoje = datetime.now()
-    competencia = f"{hoje.month-meses_passados}/{hoje.year}"
+    competencia = f"{hoje.month - meses_passados}/{hoje.year}"
     if len(competencia) == 6:
         return f"0{competencia}"
     else:
         return competencia
+
 
 def classificar_mes(data_str):
     try:
@@ -30,75 +35,84 @@ def classificar_mes(data_str):
         raise ValueError("Data inválida. Use o formato dd/mm/aaaa e uma data real (ex.: 27/01/2026).")
 
     hoje = datetime.today()
-
     if (dt.year, dt.month) == (hoje.year, hoje.month):
         return "mes atual"
     else:
         return "mes passado"
 
-hoje = data_hoje_formatada()
 
 # === Define o diretório base (onde está o main.py) ===
 BASE_DIR = Path(__file__).resolve().parent
 config_path = BASE_DIR / "config.json"
 
-fis = input("Digite o número da folha de deferimento: ")
-matricula = input("Digite a matrícula: ")
-nome = input("Digite o nome do requerente: ")
-cargo = input("Digite o cargo: ")
-numero_processo = input("Digite o número do processo: ")
-data_deferimento = input("Digite a data de deferimento: ")
+hoje = data_hoje_formatada()
 competencia = gera_competencia()
-inciso = input("Digite o inciso: ")
 
-substituicoes = {
-    "{{FIS}}": fis,
-    "{{NOME}}": nome,
-    "{{MATRICULA}}": matricula,
-    "{{CARGO}}": cargo,
-    "{{NUMERO_PROCESSO}}": numero_processo,
-    "{{DATA_DEFERIMENTO}}": data_deferimento,
-    "{{COMP}}": competencia,
-    "{{HOJE}}": hoje,
-    "{{INCISO}}": inciso
+# === Coleta de inputs em um dicionário único ===
+dados = {
+    "fis": input("Digite o número da folha de deferimento: ").strip(),
+    "matricula": input("Digite a matrícula: ").strip(),
+    "nome": input("Digite o nome do requerente: ").strip(),
+    "cargo": input("Digite o cargo: ").strip(),
+    "numero_processo": input("Digite o número do processo: ").strip(),
+    "data_deferimento": input("Digite a data de deferimento: ").strip(),
+    "inciso": input("Digite o inciso: ").strip(),
+    "competencia": competencia,
+    "hoje": hoje,
 }
 
-if inciso == "I" or inciso == "II":
+# === Monta substituições a partir do dicionário ===
+substituicoes = {
+    "{{FIS}}": dados["fis"],
+    "{{NOME}}": dados["nome"],
+    "{{MATRICULA}}": dados["matricula"],
+    "{{CARGO}}": dados["cargo"],
+    "{{NUMERO_PROCESSO}}": dados["numero_processo"],
+    "{{DATA_DEFERIMENTO}}": dados["data_deferimento"],
+    "{{COMP}}": dados["competencia"],
+    "{{HOJE}}": dados["hoje"],
+    "{{INCISO}}": dados["inciso"],
+}
+
+# === Escolhe modelo de portaria / grupo ===
+if dados["inciso"] in ("I", "II"):
     modelo_portaria = BASE_DIR / "modelos" / "entrada" / "modelo-folha-portaria.docx"
 else:
     modelo_portaria = BASE_DIR / "modelos" / "entrada" / "modelo-folha-portaria-com-grupo.docx"
-    grupo = input("Digite o grupo: ")
-    substituicoes["{{GRUPO}}"] = grupo
+    dados["grupo"] = input("Digite o grupo: ").strip()
+    substituicoes["{{GRUPO}}"] = dados["grupo"]
 
-mes_do_deferimento = classificar_mes(data_deferimento)
-if mes_do_deferimento == 'mes atual':
+# === Escolhe modelo de informações / retroativo ===
+mes_do_deferimento = classificar_mes(dados["data_deferimento"])
+
+if mes_do_deferimento == "mes atual":
     modelo_informacoes = BASE_DIR / "modelos" / "entrada" / "modelo-folha-info2.docx"
 else:
     modelo_informacoes = BASE_DIR / "modelos" / "entrada" / "modelo-folha-info-retroativo.docx"
-    valor_do_retroativo = input("Digite o valor do retroativo a ser pago: ")
-    substituicoes["{{COMPETENCIA_ANTERIOR}} "] = gera_competencia(1)
-    substituicoes["{{VALOR}}"] = valor_do_retroativo
+    dados["valor_retroativo"] = input("Digite o valor do retroativo a ser pago: ").strip()
 
+    # Correção: removido espaço do placeholder
+    substituicoes["{{COMPETENCIA_ANTERIOR}}"] = gera_competencia(1)
+    substituicoes["{{VALOR}}"] = dados["valor_retroativo"]
+
+# === Lê config.json ===
 if not config_path.exists():
     raise FileNotFoundError("Arquivo config.json não encontrado! Crie um antes de executar.")
 
 with open(config_path, "r", encoding="utf-8") as f:
-        config = json.load(f)
+    config = json.load(f)
 
-# Paths de saída vindos do arquivo externo
 saida_informacoes_dir = Path(config["saida_informacoes"])
 saida_portaria_dir = Path(config["saida_portaria"])
 
-# Garante que as pastas existem
 saida_informacoes_dir.mkdir(parents=True, exist_ok=True)
 saida_portaria_dir.mkdir(parents=True, exist_ok=True)
 
-# Gera caminhos finais dos arquivos
-saida_informacoes = saida_informacoes_dir / f"Adicional Conclusão de Curso - {nome}.docx"
-saida_portaria = saida_portaria_dir / f"Adicional por Conclusão de Curso - {nome}.docx"
+saida_informacoes = saida_informacoes_dir / f"Adicional Conclusão de Curso - {dados['nome']}.docx"
+saida_portaria = saida_portaria_dir / f"Adicional por Conclusão de Curso - {dados['nome']}.docx"
 
 
-# === 5. Função de substituição ===
+# === Funções do DOCX ===
 def substituir_texto(paragrafo, mapa):
     if not paragrafo.runs:
         return
@@ -110,41 +124,26 @@ def substituir_texto(paragrafo, mapa):
         texto_novo = texto_novo.replace(chave, str(valor))
 
     if texto_novo != texto_original:
-        # coloca tudo no primeiro run e apaga o resto
         paragrafo.runs[0].text = texto_novo
         for run in paragrafo.runs[1:]:
             run.text = ""
 
 
-
 def aplicar_substituicoes(caminho_modelo, caminho_saida, mapa):
-    """Abre o modelo, substitui e salva o resultado."""
     doc = Document(caminho_modelo)
 
-    # Substitui em parágrafos
     for paragrafo in doc.paragraphs:
         substituir_texto(paragrafo, mapa)
 
-    # Substitui em tabelas (caso existam)
     for tabela in doc.tables:
         for linha in tabela.rows:
             for celula in linha.cells:
                 for paragrafo in celula.paragraphs:
                     substituir_texto(paragrafo, mapa)
 
-    # Salva o arquivo final
     doc.save(caminho_saida)
 
-
-aplicar_substituicoes(modelo_informacoes, saida_informacoes, substituicoes)
-aplicar_substituicoes(modelo_portaria, saida_portaria, substituicoes)
-
-
 def abrir_no_libreoffice(caminho_arquivo):
-    """
-    Abre um arquivo usando o LibreOffice em uma nova janela.
-    Compatível com Windows.
-    """
     possiveis_caminhos = [
         r"C:\Program Files\LibreOffice\program\soffice.exe",
         r"C:\Program Files (x86)\LibreOffice\program\soffice.exe"
@@ -161,11 +160,17 @@ def abrir_no_libreoffice(caminho_arquivo):
 
     subprocess.Popen([soffice, caminho_arquivo])
 
-
+aplicar_substituicoes(modelo_informacoes, saida_informacoes, substituicoes)
+aplicar_substituicoes(modelo_portaria, saida_portaria, substituicoes)
 abrir_no_libreoffice(str(saida_informacoes))
 abrir_no_libreoffice(str(saida_portaria))
-
 
 print("\n✅ Documentos gerados com sucesso!")
 print(f"📄 {saida_informacoes}")
 print(f"📄 {saida_portaria}")
+
+# === Chamada do módulo web no final ===
+try:
+    acessar_web(dados)
+except Exception as e:
+    print(f"\n⚠️ Falha ao preencher o sistema web: {e}")
