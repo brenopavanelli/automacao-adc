@@ -160,10 +160,12 @@ def abrir_no_libreoffice(caminho_arquivo):
 
     subprocess.Popen([soffice, caminho_arquivo])
 
+'''
 aplicar_substituicoes(modelo_informacoes, saida_informacoes, substituicoes)
 aplicar_substituicoes(modelo_portaria, saida_portaria, substituicoes)
 abrir_no_libreoffice(str(saida_informacoes))
 abrir_no_libreoffice(str(saida_portaria))
+'''
 
 print("\n✅ Documentos gerados com sucesso!")
 print(f"📄 {saida_informacoes}")

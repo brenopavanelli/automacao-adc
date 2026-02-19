@@ -8,8 +8,10 @@ from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.common.keys import Keys
 
 import time
+import sys
 
-def acessar_web():
+
+def acessar_web(dados):
     servico = Service(ChromeDriverManager().install())
     driver = webdriver.Chrome(service=servico)
     driver.get("https://pmjaboticabal.smarapd.com.br/rh/#/recursoshumanos/lancamentofixo")
@@ -58,14 +60,36 @@ def acessar_web():
         clicar_em_botao(incluir)
 
         def preencher_formulario():
-
             def preencher_dados():
                 registro_funcional = WebDriverWait(driver, 10).until(
                     EC.presence_of_element_located((By.XPATH, "/html/body/div[4]/div/div/div/div/div[2]/section[1]/div/div/div/div/div/form/div[1]/div[1]/ddados-item/ddados-suggestion/div/ng-form/div/div/div[1]/ng-form/div/div/div/input"))
                 )
-                registro_funcional.send_keys(matricula)
+                registro_funcional.send_keys(dados["matricula"])
                 time.sleep(1)
                 registro_funcional.send_keys(Keys.ENTER)
+
+                verba = WebDriverWait(driver, 10).until(
+                    EC.presence_of_element_located((By.XPATH, "/html/body/div[4]/div/div/div/div/div[2]/section[1]/div/div/div/div/div/form/div[1]/div[2]/ddados-item/ddados-suggestion/div/ng-form/div/div/div[1]/ng-form/div/div/div/input"))
+                )
+                def selecionar_valor_verba(status):
+                    match status:
+                        case "I":
+                            return "108"
+                        case "II":
+                            return "1120"
+                        case "III":
+                            return "109"
+                        case "IV":
+                            return "110"
+                        case "V":
+                            return "111"
+                        case _:  # The wildcard '_' acts as a default case
+                            print("ERRO: Verba Desconhecida, encerrando sistema.")
+                            sys.exit(1)
+                verba.send_keys(selecionar_valor_verba(dados.get("inciso")))
+                time.sleep(1)
+                verba.send_keys(Keys.ENTER)
+
             preencher_dados()
 
         preencher_formulario()
@@ -77,8 +101,3 @@ def acessar_web():
     time.sleep(10)
     print("Encerrando sistema WEB")
     driver.quit()
-
-
-matricula = input("Digite a matrícula: ")
-time.sleep(2)
-acessar_web()
