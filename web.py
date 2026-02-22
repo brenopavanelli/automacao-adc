@@ -90,20 +90,25 @@ def acessar_web(dados):
                 time.sleep(1)
                 verba.send_keys(Keys.ENTER)
 
-                data_deferimento = WebDriverWait(driver, 10).until(
-                    EC.presence_of_element_located((By.XPATH, "/html/body/div[4]/div/div/div/div/div[2]/section[1]/div/div/div/div/div/form/div[5]/div[1]/fieldset/div/div[2]/div[1]/div[1]/ddados-item/ddados-date/div/ng-form/div/div/div/span/span/input"))
-                )
-                data = dados["data_deferimento"]
-                dd, mm, yyyy = data.split("/")
+                def preencher_data(input, xpath):
+                    data = WebDriverWait(driver, 10).until(
+                        EC.presence_of_element_located((By.XPATH, xpath))
+                    )
+                    dd, mm, yyyy = input.split("/")
 
-                data_deferimento.click()
-                data_deferimento.send_keys(Keys.CONTROL, "a", Keys.BACKSPACE)
+                    data.click()
+                    data.send_keys(Keys.CONTROL, "a", Keys.BACKSPACE)
 
-                data_deferimento.send_keys(dd)
-                data_deferimento.send_keys(mm)
-                data_deferimento.send_keys(yyyy)
-                time.sleep(1)
-                data_deferimento.send_keys(Keys.ENTER)
+                    data.send_keys(dd)
+                    data.send_keys(mm)
+                    data.send_keys(yyyy)
+                    time.sleep(1)
+                    data.send_keys(Keys.ENTER)
+
+                preencher_data(dados["data_deferimento"], "/html/body/div[4]/div/div/div/div/div[2]/section[1]/div/div/div/div/div/form/div[5]/div[1]/fieldset/div/div[2]/div[1]/div[1]/ddados-item/ddados-date/div/ng-form/div/div/div/span/span/input")
+
+
+
 
 
 
