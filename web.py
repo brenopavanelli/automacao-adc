@@ -107,11 +107,19 @@ def acessar_web(dados):
 
                 preencher_data(dados["data_deferimento"], "/html/body/div[4]/div/div/div/div/div[2]/section[1]/div/div/div/div/div/form/div[5]/div[1]/fieldset/div/div[2]/div[1]/div[1]/ddados-item/ddados-date/div/ng-form/div/div/div/span/span/input")
 
+                DATA_VENCIMENTO_PADRAO = "31/12/2999"
+                preencher_data(DATA_VENCIMENTO_PADRAO, "/html/body/div[4]/div/div/div/div/div[2]/section[1]/div/div/div/div/div/form/div[5]/div[1]/fieldset/div/div[2]/div[2]/div[2]/ddados-item/ddados-date/div/ng-form/div/div/div/span/span/input")
 
+                observacao = WebDriverWait(driver, 10).until(
+                    EC.presence_of_element_located((By.XPATH, "/html/body/div[4]/div/div/div/div/div[2]/section[1]/div/div/div/div/div/form/div[6]/div/ddados-item/ddados-textarea/div/ng-form/div/div/div/textarea[1]"))
+                )
+                observacao.send_keys(f"Conforme processo n.º {dados["numero_processo"]}")
+                time.sleep(1)
 
-
-
-
+                proximo = WebDriverWait(driver, 10).until(
+                    EC.element_to_be_clickable((By.XPATH, "/html/body/div[4]/div/div/div/div/div[3]/div/div[3]/button[1]"))
+                )
+                proximo.click()
 
 
             preencher_dados()
