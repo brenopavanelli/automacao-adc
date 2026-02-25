@@ -10,6 +10,9 @@ from selenium.webdriver.common.keys import Keys
 import time
 import sys
 
+import os
+from dotenv import load_dotenv
+
 
 def acessar_web(dados):
     servico = Service(ChromeDriverManager().install())
@@ -29,16 +32,22 @@ def acessar_web(dados):
     def realizar_login():
         print("Realizando o login na página")
         try:
+            usuario_smar = os.getenv("SMAR_USER")
+            senha_smar = os.getenv("SMAR_PASSWORD")
+
+            if not usuario_smar or not senha_smar:
+                raise ValueError("Credenciais não encontradas no .env")
+
             usuario = WebDriverWait(driver, 10).until(
                 EC.presence_of_element_located((By.NAME, "userId"))
             )
-            usuario.send_keys("bpsantos")
+            usuario.send_keys(usuario_smar)
             print("Usuário preenchido")
 
             senha = WebDriverWait(driver, 10).until(
                 EC.presence_of_element_located((By.NAME, "password"))
             )
-            senha.send_keys("Cavalo13!")
+            senha.send_keys(senha_smar)
             print("Senha preenchida")
 
             confirmar = "/html/body/div[3]/div/div/form/div/div[4]/div/button"
