@@ -13,6 +13,8 @@ import sys
 import os
 from dotenv import load_dotenv
 
+load_dotenv()
+
 
 def acessar_web(dados):
     servico = Service(ChromeDriverManager().install())

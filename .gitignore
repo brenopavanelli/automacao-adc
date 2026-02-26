@@ -45,6 +45,7 @@ htmlcov/
 .tox/
 .nox/
 .coverage
+teste.py
 .coverage.*
 .cache
 nosetests.xml
