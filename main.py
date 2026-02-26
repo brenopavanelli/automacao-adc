@@ -8,6 +8,10 @@ import os
 # Import do módulo web (arquivo separado)
 from web import acessar_web
 
+# Import da tabela de verbas (novo arquivo)
+from tabela_verbas import selecionar_aliquota
+
+
 # === 1. Função para gerar a data de hoje formatada ===
 def data_hoje_formatada():
     meses = {
@@ -39,7 +43,6 @@ def classificar_mes(data_str):
         return "mes atual"
     else:
         return "mes passado"
-
 
 # === Define o diretório base (onde está o main.py) ===
 BASE_DIR = Path(__file__).resolve().parent
@@ -94,33 +97,15 @@ else:
         dia_do_deferimento = int(dia_do_deferimento[0:2])
         DIAS_POR_MES = 30
 
-        def selecionar_valor_verba(inciso):
-            match inciso:
-                case "I":
-                    return 0.020
-                case "II":
-                    return 0.025
-                case "III":
-                    return 0.030
-                case "IV":
-                    return 0.040
-                case "V":
-                    return 0.050
-                case _:
-                    raise ValueError("Verba desconhecida")
-
-        valor_do_adicional = selecionar_valor_verba(inciso)
-
+        valor_do_adicional = selecionar_aliquota(inciso)
         dias_para_retroagir = DIAS_POR_MES - dia_do_deferimento + 1
 
         valor_do_retroativo = round(salario_base / DIAS_POR_MES * valor_do_adicional * dias_para_retroagir, 2)
         return valor_do_retroativo
 
     salario_base = float(input("Digite o salário base do servidor: ").strip().replace(".", "").replace(",", "."))
-
     dados["valor_retroativo"] = calcular_retroativo(salario_base, dados["data_deferimento"], dados["inciso"])
 
-    # Correção: removido espaço do placeholder
     substituicoes["{{COMPETENCIA_ANTERIOR}}"] = gera_competencia(1)
     substituicoes["{{VALOR}}"] = dados["valor_retroativo"]
 
