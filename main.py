@@ -63,7 +63,7 @@ substituicoes = {
     "{{INCISO}}": inciso
 }
 
-if inciso == "I" or inciso == "II":
+if inciso == "I" or inciso == "II" or inciso == "VI":
     modelo_portaria = BASE_DIR / "modelos" / "entrada" / "modelo-folha-portaria.docx"
 else:
     modelo_portaria = BASE_DIR / "modelos" / "entrada" / "modelo-folha-portaria-com-grupo.docx"
