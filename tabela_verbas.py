@@ -4,6 +4,7 @@ VERBAS = {
     "III": {"aliquota": 0.030, "codigo": "109"},
     "IV":  {"aliquota": 0.040, "codigo": "110"},
     "V":   {"aliquota": 0.050, "codigo": "111"},
+    "VI":  {"aliquota": 0.060, "codigo": "1140"}
 }
 
 def normalizar_inciso(inciso: str) -> str:

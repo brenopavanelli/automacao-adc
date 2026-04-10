@@ -174,20 +174,22 @@ def abrir_no_libreoffice(caminho_arquivo):
 
     subprocess.Popen([soffice, caminho_arquivo])
 
-'''
-aplicar_substituicoes(modelo_informacoes, saida_informacoes, substituicoes)
-aplicar_substituicoes(modelo_portaria, saida_portaria, substituicoes)
-abrir_no_libreoffice(str(saida_informacoes))
-abrir_no_libreoffice(str(saida_portaria))
-'''
-
-print("\n✅ Documentos gerados com sucesso!")
-print(f"📄 {saida_informacoes}")
-print(f"📄 {saida_portaria}")
-
 # === Chamada do módulo web no final ===
 try:
     acessar_web(dados)
     print(dados)
 except Exception as e:
     print(f"\n⚠️ Falha ao preencher o sistema web: {e}")
+
+else:
+    try:
+        aplicar_substituicoes(modelo_informacoes, saida_informacoes, substituicoes)
+        aplicar_substituicoes(modelo_portaria, saida_portaria, substituicoes)
+        abrir_no_libreoffice(str(saida_informacoes))
+        abrir_no_libreoffice(str(saida_portaria))
+
+        print("\n✅ Documentos gerados com sucesso!")
+        print(f"📄 {saida_informacoes}")
+        print(f"📄 {saida_portaria}")
+    except:
+        print(f"\n⚠️ Falha ao gerar os documentos: {e}")
