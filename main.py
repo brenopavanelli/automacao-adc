@@ -1,5 +1,5 @@
 from docx import Document
-from datetime import datetime
+from datetime import datetime, date, timedelta
 from pathlib import Path
 import json
 import subprocess
@@ -38,10 +38,28 @@ def classificar_mes(data_str):
     except ValueError:
         raise ValueError("Data inválida. Use o formato dd/mm/aaaa e uma data real (ex.: 27/01/2026).")
 
-    hoje = datetime.today()
-    if (dt.year, dt.month) == (hoje.year, hoje.month):
+    hoje = date.today()
+
+    # Primeiro dia do mês atual
+    primeiro_dia_mes_atual = hoje.replace(day=1)
+
+    # Último dia do mês anterior
+    ultimo_dia_mes_anterior = primeiro_dia_mes_atual - timedelta(days=1)
+
+    # Regra:
+    # 1. Se for do mês atual -> "mes atual"
+    # 2. Se for o dia 31 do mês anterior -> "mes atual"
+    if (
+        (dt.year, dt.month) == (hoje.year, hoje.month)
+        or (
+            dt == ultimo_dia_mes_anterior
+            and ultimo_dia_mes_anterior.day == 31
+        )
+    ):
+        print("Não há retroativo. Prosseguindo com procedimento padrão...")
         return "mes atual"
     else:
+        print("Há retroativo. Adaptando sistema...")
         return "mes passado"
 
 # === Define o diretório base (onde está o main.py) ===
@@ -89,7 +107,7 @@ else:
 mes_do_deferimento = classificar_mes(dados["data_deferimento"])
 
 if mes_do_deferimento == "mes atual":
-    modelo_informacoes = BASE_DIR / "modelos" / "entrada" / "modelo-folha-info2.docx"
+    modelo_informacoes = BASE_DIR / "modelos" / "entrada" / "modelo-folha-info.docx"
 else:
     modelo_informacoes = BASE_DIR / "modelos" / "entrada" / "modelo-folha-info-retroativo.docx"
 
@@ -176,6 +194,7 @@ def abrir_no_libreoffice(caminho_arquivo):
 
 # === Chamada do módulo web no final ===
 try:
+    print("Aguarde módulo WEB operar...")
     acessar_web(dados)
     print(dados)
 except Exception as e:
@@ -183,6 +202,7 @@ except Exception as e:
 
 else:
     try:
+        print("Aguarde geração dos docuentos:")
         aplicar_substituicoes(modelo_informacoes, saida_informacoes, substituicoes)
         aplicar_substituicoes(modelo_portaria, saida_portaria, substituicoes)
         abrir_no_libreoffice(str(saida_informacoes))
